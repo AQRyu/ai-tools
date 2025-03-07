@@ -1,0 +1,136 @@
+version: 1.0 # Added versioning
+
+testStructure:
+  - rule: AAAPattern
+    metric: Detect distinct code blocks for setup, action, and verification.
+    scoring: 90-100% for clear AAA; 70-89% minor deviations; <70% major deviations.
+  - rule: SingleAssert
+    metric: Count assertion method calls per test method.
+    scoring: 100% for 1 assertion; 90% for 2-3 related assertions; <70% for >3.
+  - rule: DescriptiveNaming
+    metric: Use NLP to analyze test method names.
+    scoring: 90-100% for clear, descriptive names; 70-89% vague; <70% unclear.
+    expected:
+      classNamePattern: ".*Test$"
+      methodNamingPatterns:
+        - "should.*When.*"
+        - "given.*When.*Then.*"
+        - "expect.*When.*"
+      positiveKeywords:
+        - "should"
+        - "when"
+        - "given"
+        - "then"
+        - "expect"
+        - "verify"
+        - "assert"
+      negativeKeywords: # Added negative keywords
+        - "test"
+        - "check"
+      maxLength: 80 # Added length constraint (example)
+
+junit5Compliance:
+  - rule: JUnit5Annotations
+    metric: Check for presence/correct usage of @Test, @BeforeEach, @AfterEach, @ParameterizedTest, @Nested.  Flag deprecated JUnit 4 annotations.
+    scoring: 100% correct; deductions per incorrect/missing; severe deductions for JUnit 4.
+    expected:
+      requiredAnnotations:
+        - "org.junit.jupiter.api.Test"
+      deprecatedAnnotations:
+        - "org.junit.Test"
+        - "org.junit.Before"
+        - "org.junit.After"
+  - rule: JUnit5Assertions
+    metric: Verify assertion methods are from org.junit.jupiter.api.Assertions. Flag deprecated JUnit 4.
+    scoring: 100% correct; deductions for incorrect/deprecated.
+    expected:
+      packagePath: "org.junit.jupiter.api.Assertions"
+  - rule: ParameterizedTests
+    metric: Identify potential parameterized tests. Check for @ParameterizedTest.
+    scoring: Bonus points for appropriate use; no penalty, but suggest.
+  - rule: NestedTests
+    metric: Check for @Nested classes.
+    scoring: Bonus points for good use; no penalty.
+
+mockitoUsage:
+  - rule: MockAnnotations
+    metric: Check @Mock and @InjectMocks usage.  Ensure @InjectMocks is on the class under test.
+    scoring: 100% correct; deductions per incorrect/missing.
+  - rule: ConstructorInjection
+    metric: Check if mocked dependencies are injected via constructor.
+    scoring: 100% constructor; 70% field; 0% setter.
+  - rule: MockStubbing
+    metric: Check syntax/usage of when().  Ensure concise stubbing.
+    scoring: 100% correct and concise; deductions for syntax errors or excessive stubbing.
+    # Refined scoring (example):
+    # scoring: 100% if stubbed calls <= methods in class under test; -10% per additional stubbed call.
+    expected:
+      stubbingMethods:
+        - "org.mockito.Mockito.when"
+  - rule: MockVerification
+    metric: Check verify() usage. Ensure appropriate verification modes.
+    scoring: 100% comprehensive verification; deductions for missing/insufficient.
+    expected:
+      verificationMethods:
+        - "org.mockito.Mockito.verify"
+  - rule: AvoidOverMocking
+    metric: Analyze dependency graph. Count mocked vs. actual dependencies.
+    scoring: 100% only direct dependencies mocked; deductions per indirect/value object mocked.
+  - rule: AvoidSpies
+    metric: Detect Mockito.spy() usage.
+    scoring: 0% for any spy() use.
+
+springBootSpecifics:
+  - rule: MinimizeSpringBootTest
+    metric: Count @SpringBootTest annotations.
+    scoring: 100% zero; 50% one; 0% more than one.  Provide warning.
+  - rule: UseWebMvcTest
+    metric: Check for @WebMvcTest on controller classes.
+    scoring: 100% correct; 0% using @SpringBootTest; provide suggestion.
+  - rule: UseDataJpaTest
+    metric: Check for @DataJpaTest on repository classes.
+    scoring: 100% correct; 0% using @SpringBootTest; provide suggestion.
+  - rule: MockBeanUsage
+    metric: Check @MockBean within @WebMvcTest or @DataJpaTest.
+    scoring: 100% correct; 0% incorrect/within @SpringBootTest; suggest.
+
+testIsolation:
+  - rule: NoExternalDependencies
+    metric:
+      - checkForDatabaseConnections # More granular metrics
+      - checkForNetworkRequests
+      - checkForFileSystemAccess
+    scoring: 100% no external dependencies; 0% any detected.
+  - rule: NoSharedState
+    metric: Analyze for state sharing (static variables, shared resources). Check @Order.
+    scoring: 100% isolation; deductions for sharing or @Order.
+  - rule: Deterministic
+    metric: Analyze for random values and time dependencies.
+    scoring: 100% deterministic; deductions unless specifically testing them.
+
+coverage:
+  - rule: CodeCoverage
+    tool: JaCoCo # Specify the tool
+    reportFormat: XML # Specify report format
+    metric: Obtain line, branch, method coverage from JaCoCo XML report.
+    scoring: Provide feedback on percentages, highlight low coverage. Encourage >80% branch coverage, but no strict threshold. Suggest improvements.
+
+performance: # New section for performance-related checks
+  - rule: testSpeedThreshold
+    metric: Measure the execution time of each test method.
+    scoring: 100% for tests under 500ms; 90% for tests under 1s; 70% for tests under 2s; <70% for tests over 2s.
+    threshold: 500 # milliseconds - adjust as needed
+
+reporting:
+  overallScore: "Weighted average score based on all rules."
+  ruleViolations:
+    - file: "File and line number of violation."
+      rule: "Rule name and description."
+      feedback: "Specific feedback on the violation."
+      suggestion: "Suggested improvements."
+      severity: "Critical, Major, Minor, or Style" # Added severity
+  codeCoverageSummary: "Overall coverage (line, branch, method) and low coverage areas."
+  recommendations: "General recommendations for improvement."
+  errorHandling: # Added error handling
+    - "Report parsing errors with file and line number."
+    - "Report inability to evaluate rules with reasons."
