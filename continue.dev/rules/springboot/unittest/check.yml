@@ -8,14 +8,10 @@ testStructure:
     metric: Count assertion method calls per test method.
     scoring: 100% for 1 assertion; 90% for 2-3 related assertions; <70% for >3.
   - rule: DescriptiveNaming
-    metric: Use NLP to analyze test method names.
-    scoring: 90-100% for clear, descriptive names; 70-89% vague; <70% unclear.
+    metric: Use NLP to analyze test method names. Check for keywords and their order.
+    scoring: 90-100% for clear, descriptive names following a convention; 70-89% vague; <70% unclear.
     expected:
       classNamePattern: ".*Test$"
-      methodNamingPatterns:
-        - "should.*When.*"
-        - "given.*When.*Then.*"
-        - "expect.*When.*"
       positiveKeywords:
         - "should"
         - "when"
@@ -24,10 +20,20 @@ testStructure:
         - "expect"
         - "verify"
         - "assert"
-      negativeKeywords: # Added negative keywords
+      negativeKeywords:
         - "test"
         - "check"
-      maxLength: 80 # Added length constraint (example)
+      maxLength: 80
+      namingConventions:
+        - description: "Should/When"
+          requiredKeywords: [ "should", "when" ]
+          order: strict
+        - description: "Given/When/Then"
+          requiredKeywords: [ "given", "when", "then" ]
+          order: strict
+        - description: "Expect/When"
+          requiredKeywords: [ "expect", "when" ]
+          order: strict
 
 junit5Compliance:
   - rule: JUnit5Annotations
