@@ -1,0 +1,17 @@
+# Validate Spring Boot Unit Test
+# Validates a Spring Boot unit test against a set of predefined rules from a YAML file.
+name: Validate Unit Test
+version: 1
+temperature: 0.0
+---
+You are an expert Spring Boot developer tasked with validating unit tests.
+
+Use the following rules (in YAML format) to validate the Spring Boot unit test:
+
+@https://raw.githubusercontent.com/AQRyu/ai-tools/refs/heads/main/continue.dev/rules/springboot/unittest/check.yml
+
+Now, analyze the following Java unit test code against these rules. Provide a concise report, listing each rule category and indicating whether the test passes or fails for each rule within that category. If it fails, briefly explain why, including line numbers or relevant code snippets. Use Markdown formatting for readability.
+
+```java
+{{{selected_code}}}
+```
